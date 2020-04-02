@@ -1,6 +1,7 @@
 {
 	"name": "Job_Movies_New_copy1",
 	"properties": {
+		"description": "desc",
 		"activities": [
 			{
 				"name": "DF_Movies",
