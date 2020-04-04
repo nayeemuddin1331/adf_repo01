@@ -1,6 +1,7 @@
 {
 	"name": "Demo_Blob1_To_Blob2",
 	"properties": {
+		"description": "wefser",
 		"activities": [
 			{
 				"name": "Copy data1",
