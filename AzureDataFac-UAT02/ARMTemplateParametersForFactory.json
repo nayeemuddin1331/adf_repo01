@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"factoryName": {
-			"value": "AzureDataFac-DEV-01"
+			"value": "AzureDataFac-UAT02"
 		},
 		"AzureBlobStorage1_connectionString": {
 			"value": ""
@@ -15,12 +15,6 @@
 			"value": ""
 		},
 		"Blob_connectionString": {
-			"value": ""
-		},
-		"containerUri": {
-			"value": ""
-		},
-		"containerSasToken": {
 			"value": ""
 		}
 	}
