@@ -1,0 +1,25 @@
+{
+	"name": "TRG_EventPlanesNew",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Job_planes_new",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/adfcontainer01/blobs/planes_new",
+			"blobPathEndsWith": ".csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/f40d6123-20ce-48f2-990f-3b163818e51e/resourceGroups/ADF_ResourceGrp01/providers/Microsoft.Storage/storageAccounts/adfstorageacc01",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
