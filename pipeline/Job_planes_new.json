@@ -34,7 +34,13 @@
 				"inputs": [
 					{
 						"referenceName": "PlanesNewCSV",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": {
+								"value": "@pipeline().parameters.filename",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
@@ -47,9 +53,6 @@
 		],
 		"parameters": {
 			"filename": {
-				"type": "string"
-			},
-			"tablename": {
 				"type": "string"
 			}
 		},
