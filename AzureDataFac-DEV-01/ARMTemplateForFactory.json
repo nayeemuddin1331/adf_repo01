@@ -1824,7 +1824,7 @@
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/adfcontainer01/blobs/planes_new",
+					"blobPathBeginsWith": "/adfcontainer01/blobs/",
 					"blobPathEndsWith": ".csv",
 					"ignoreEmptyBlobs": true,
 					"scope": "[parameters('TRG_EventPlanesNew_properties_typeProperties_scope')]",
