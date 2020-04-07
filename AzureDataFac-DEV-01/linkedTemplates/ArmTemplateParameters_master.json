@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "AzureDataFac-DEV-01"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureMySql1_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
+		"Blob_connectionString": {
+			"value": ""
+		},
+		"TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName": {
+			"value": "@triggerBody().fileName"
+		},
+		"TRG_EventPlanesNew_properties_typeProperties_scope": {
+			"value": "/subscriptions/f40d6123-20ce-48f2-990f-3b163818e51e/resourceGroups/ADF_ResourceGrp01/providers/Microsoft.Storage/storageAccounts/adfstorageacc01"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
