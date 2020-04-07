@@ -16,7 +16,7 @@
 		],
 		"type": "BlobEventsTrigger",
 		"typeProperties": {
-			"blobPathBeginsWith": "/adfcontainer01/blobs/planes_new",
+			"blobPathBeginsWith": "/adfcontainer01/blobs/",
 			"blobPathEndsWith": ".csv",
 			"ignoreEmptyBlobs": true,
 			"scope": "/subscriptions/f40d6123-20ce-48f2-990f-3b163818e51e/resourceGroups/ADF_ResourceGrp01/providers/Microsoft.Storage/storageAccounts/adfstorageacc01",
