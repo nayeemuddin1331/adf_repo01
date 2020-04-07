@@ -1695,7 +1695,7 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"fileName": {
-										"value": "@pipeline().parameters.filename",
+										"value": "@pipeline().parameters.fileName",
 										"type": "Expression"
 									}
 								}
