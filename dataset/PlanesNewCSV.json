@@ -19,7 +19,7 @@
 					"value": "@dataset().fileName",
 					"type": "Expression"
 				},
-				"container": "/adfcontainer01"
+				"container": "adfcontainer01"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
