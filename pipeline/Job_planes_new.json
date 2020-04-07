@@ -52,7 +52,7 @@
 			}
 		],
 		"parameters": {
-			"filename": {
+			"fileName": {
 				"type": "string"
 			}
 		},
