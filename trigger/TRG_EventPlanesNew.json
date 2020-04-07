@@ -8,6 +8,9 @@
 				"pipelineReference": {
 					"referenceName": "Job_planes_new",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"filename": "@triggerBody().fileName"
 				}
 			}
 		],
