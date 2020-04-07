@@ -20,7 +20,6 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFileName": "planes_new_*.csv",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
