@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "select * from Planes where ICAO='A318'",
+						"sqlReaderQuery": "declare @dt datetime\nSET @dt = getdate()\nselect @dt currdate\nselect * from Planes where ICAO='A318'",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -42,7 +42,7 @@
 				"typeProperties": {
 					"variableName": "ICAO1",
 					"value": {
-						"value": "@activity('Lookup1').output.value[0].ICAO",
+						"value": "@activity('Lookup1').output.value[0].currdate",
 						"type": "Expression"
 					}
 				}
