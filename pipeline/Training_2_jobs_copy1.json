@@ -26,8 +26,36 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ICAO1",
+					"value": {
+						"value": "@activity('Lookup1').output.value[0]",
+						"type": "Expression"
+					}
+				}
 			}
 		],
+		"variables": {
+			"ICAO1": {
+				"type": "String"
+			},
+			"ICAO2": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
