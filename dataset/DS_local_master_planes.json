@@ -1,0 +1,33 @@
+{
+	"name": "DS_local_master_planes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LocalSQLServer01",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "ICAO",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IATA",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MAKER",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DESCRIPTION",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Planes"
+		}
+	}
+}
