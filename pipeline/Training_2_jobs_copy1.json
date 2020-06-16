@@ -23,7 +23,8 @@
 					"dataset": {
 						"referenceName": "DS_local_master_planes",
 						"type": "DatasetReference"
-					}
+					},
+					"firstRowOnly": false
 				}
 			}
 		],
