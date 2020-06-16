@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'Blob'"
 		},
+		"LocalSQLServer01_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LocalSQLServer01'"
+		},
 		"TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName": {
 			"type": "string",
 			"defaultValue": "@triggerBody().fileName"
@@ -758,6 +762,74 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Job_planes_new')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "PlanesNewCSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "OutTable_PlanesNew",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/PlanesNewCSV')]",
+				"[concat(variables('factoryId'), '/datasets/OutTable_PlanesNew')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Training_1_cars_blob_to_table')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1423,6 +1495,27 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/OutTable_PlanesNew')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Planes"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/OutputCSV')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1447,6 +1540,67 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/Blob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PlanesNewCSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"container": "adfcontainer01"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Make",
+						"type": "String"
+					},
+					{
+						"name": "Model",
+						"type": "String"
+					},
+					{
+						"name": "Type",
+						"type": "String"
+					},
+					{
+						"name": "Origin",
+						"type": "String"
+					},
+					{
+						"name": "DriveTrain",
+						"type": "String"
+					},
+					{
+						"name": "Length",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
@@ -1561,6 +1715,67 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LocalSQLServer01')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('LocalSQLServer01_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedIR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHostedIR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRG_EventPlanesNew')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Job_planes_new",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"fileName": "[parameters('TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName')]"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/adfcontainer01/blobs/",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('TRG_EventPlanesNew_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Job_planes_new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfHostedIR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DF_Movies')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1655,14 +1870,14 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Job_planes_new')]",
+			"name": "[concat(parameters('factoryName'), '/Training_2_jobs_copy1')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data1",
-						"type": "Copy",
+						"name": "Lookup1",
+						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
@@ -1674,166 +1889,89 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "declare @dt datetime\nSET @dt = getdate()\nselect @dt currdate\nselect * from Planes where ICAO='A318'",
+								"queryTimeout": "02:00:00"
 							},
-							"sink": {
-								"type": "AzureSqlSink"
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "PlanesNewCSV",
-								"type": "DatasetReference",
-								"parameters": {
-									"fileName": {
-										"value": "@pipeline().parameters.fileName",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "OutTable_PlanesNew",
+							"dataset": {
+								"referenceName": "DS_local_master_planes",
 								"type": "DatasetReference",
 								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
-						]
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "ICAO1",
+							"value": {
+								"value": "@activity('Lookup1').output.value[0].currdate",
+								"type": "Expression"
+							}
+						}
 					}
 				],
-				"parameters": {
-					"fileName": {
-						"type": "string"
+				"variables": {
+					"ICAO1": {
+						"type": "String"
+					},
+					"ICAO2": {
+						"type": "String"
 					}
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/PlanesNewCSV')]",
-				"[concat(variables('factoryId'), '/datasets/OutTable_PlanesNew')]"
+				"[concat(variables('factoryId'), '/datasets/DS_local_master_planes')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PlanesNewCSV')]",
+			"name": "[concat(parameters('factoryName'), '/DS_local_master_planes')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
+					"referenceName": "LocalSQLServer01",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"fileName": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().fileName",
-							"type": "Expression"
-						},
-						"container": "adfcontainer01"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
+				"type": "SqlServerTable",
 				"schema": [
 					{
-						"name": "Make",
-						"type": "String"
+						"name": "ICAO",
+						"type": "nvarchar"
 					},
 					{
-						"name": "Model",
-						"type": "String"
+						"name": "IATA",
+						"type": "nvarchar"
 					},
 					{
-						"name": "Type",
-						"type": "String"
+						"name": "MAKER",
+						"type": "nvarchar"
 					},
 					{
-						"name": "Origin",
-						"type": "String"
-					},
-					{
-						"name": "DriveTrain",
-						"type": "String"
-					},
-					{
-						"name": "Length",
-						"type": "String"
+						"name": "DESCRIPTION",
+						"type": "nvarchar"
 					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OutTable_PlanesNew')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
+				],
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "Planes"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TRG_EventPlanesNew')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Job_planes_new",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"fileName": "[parameters('TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName')]"
-						}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/adfcontainer01/blobs/",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('TRG_EventPlanesNew_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Job_planes_new')]"
+				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer01')]"
 			]
 		}
 	]

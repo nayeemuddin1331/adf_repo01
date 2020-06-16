@@ -17,6 +17,9 @@
 		"Blob_connectionString": {
 			"value": ""
 		},
+		"LocalSQLServer01_connectionString": {
+			"value": ""
+		},
 		"TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName": {
 			"value": "@triggerBody().fileName"
 		},

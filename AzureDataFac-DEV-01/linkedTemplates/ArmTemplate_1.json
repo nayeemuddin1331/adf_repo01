@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "AzureDataFac-DEV-01"
 		},
+		"LocalSQLServer01_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LocalSQLServer01'"
+		},
 		"TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName": {
 			"type": "string",
 			"defaultValue": "@triggerBody().fileName"
@@ -21,7 +25,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/OutTable_PlanesNew')]",
+			"name": "[concat(parameters('factoryName'), '/getlastmodstoredproc')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -32,9 +36,62 @@
 				"annotations": [],
 				"type": "AzureSqlTable",
 				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/moviesCSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "Planes"
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "movies.csv",
+						"container": "adfcontainer01"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "movieId",
+						"type": "String"
+					},
+					{
+						"name": "title",
+						"type": "String"
+					},
+					{
+						"name": "genres",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LocalSQLServer01')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('LocalSQLServer01_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "SelfHostedIR",
+					"type": "IntegrationRuntimeReference"
 				}
 			},
 			"dependsOn": []
@@ -278,7 +335,10 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/moviesCSV')]",
+				"[concat(variables('factoryId'), '/datasets/getlastmodstoredproc')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Job_ActivitiesDemo3')]",
@@ -569,6 +629,71 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Job_planes_new')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "PlanesNewCSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "OutTable_PlanesNew",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Training_1_cars_blob_to_table')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -757,7 +882,9 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/getlastmodstoredproc')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DF_Movies')]",
@@ -802,7 +929,9 @@
 					"script": "source(output(\n\t\tmovieId as string,\n\t\ttitle as string,\n\t\tgenres as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionBy('hash', 1)) ~> Movies\nMovies derive(Year = toInteger(trim(right(title, 6), '()')),\n\t\ttitle = toString(left(title, length(title)-6))) ~> YearExtraction\nYearExtraction aggregate(groupBy(Year),\n\tCount_Of_Movies = count(),\n\tpartitionBy('hash', 1)) ~> MoviesByYear\nYearExtraction sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['movies-clean.csv'],\n\tpartitionBy('hash', 1)) ~> MoviesClean\nMoviesByYear sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['MoviesByYear.csv'],\n\tpartitionBy('hash', 1)) ~> MoviesByYearOutput"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/moviesCSV')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
@@ -847,70 +976,41 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Job_planes_new')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/DS_local_master_planes')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
+				"linkedServiceName": {
+					"referenceName": "LocalSQLServer01",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
 					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink"
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "PlanesNewCSV",
-								"type": "DatasetReference",
-								"parameters": {
-									"fileName": {
-										"value": "@pipeline().parameters.fileName",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "OutTable_PlanesNew",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
+						"name": "ICAO",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IATA",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MAKER",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DESCRIPTION",
+						"type": "nvarchar"
 					}
 				],
-				"parameters": {
-					"fileName": {
-						"type": "string"
-					}
-				},
-				"annotations": []
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Planes"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/OutTable_PlanesNew')]"
+				"[concat(variables('factoryId'), '/linkedServices/LocalSQLServer01')]"
 			]
 		},
 		{

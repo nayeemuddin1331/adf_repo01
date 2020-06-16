@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'Blob'"
 		},
+		"LocalSQLServer01_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LocalSQLServer01'"
+		},
 		"TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName": {
 			"type": "string",
 			"defaultValue": "@triggerBody().fileName"
@@ -88,6 +92,9 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"LocalSQLServer01_connectionString": {
+						"value": "[parameters('LocalSQLServer01_connectionString')]"
+					},
 					"TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName": {
 						"value": "[parameters('TRG_EventPlanesNew_properties_Job_planes_new_parameters_fileName')]"
 					},
@@ -98,6 +105,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_1')]"
 			]
 		}
 	]
