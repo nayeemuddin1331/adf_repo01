@@ -10,6 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": "*.csv",
+				"folderPath": "2019/01",
 				"fileSystem": "source-test"
 			},
 			"columnDelimiter": ",",
