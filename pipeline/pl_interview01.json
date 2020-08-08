@@ -28,7 +28,7 @@
 							"type": "AzureBlobFSReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": {
-								"value": "@concat('2019',activity('Get Metadata1').output.itemName)",
+								"value": "@concat('2019/',activity('Get Metadata1').output.itemName)",
 								"type": "Expression"
 							},
 							"wildcardFileName": {
