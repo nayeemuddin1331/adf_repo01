@@ -82,7 +82,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "DS_Source_CSV",
+						"referenceName": "DS_Source_2_CSV",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
